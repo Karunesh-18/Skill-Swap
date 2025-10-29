@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Skills - Skill Swap</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: #f5f5f5;
+      }
+      .navbar {
+        background: #667eea;
+        color: white;
+        padding: 15px 30px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .navbar h2 {
+        margin: 0;
+      }
+      .nav-links a {
+        color: white;
+        text-decoration: none;
+        margin-left: 20px;
+      }
+      .container {
+        max-width: 1200px;
+        margin: 30px auto;
+        padding: 0 20px;
+      }
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+      }
+      .btn {
+        padding: 10px 20px;
+        background: #667eea;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+      .btn:hover {
+        background: #5568d3;
+      }
+      .tabs {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+      }
+      .tab {
+        padding: 10px 20px;
+        background: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+      .tab.active {
+        background: #667eea;
+        color: white;
+      }
+      .skills-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+      }
+      .skill-card {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+      .skill-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        margin-bottom: 10px;
+      }
+      .skill-type {
+        padding: 5px 10px;
+        border-radius: 5px;
+        font-size: 0.8rem;
+      }
+      .offered {
+        background: #4caf50;
+        color: white;
+      }
+      .requested {
+        background: #ff9800;
+        color: white;
+      }
+      .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        align-items: center;
+        justify-content: center;
+      }
+      .modal-content {
+        background: white;
+        padding: 30px;
+        border-radius: 10px;
+        max-width: 500px;
+        width: 90%;
+      }
+      .form-group {
+        margin-bottom: 15px;
+      }
+      label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 500;
+      }
+      input,
+      select,
+      textarea {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="navbar">
+      <h2>Skill Swap</h2>
+      <div class="nav-links">
+        <a href="/dashboard">Dashboard</a>
+        <a href="/skills">My Skills</a>
+        <a href="/matches">Matches</a>
+        <a href="/sessions">Sessions</a>
+        <a href="/profile">Profile</a>
+        <a href="#" onclick="logout()">Logout</a>
+      </div>
+    </div>
+    <div class="container">
+      <div class="header">
+        <h1>My Skills</h1>
+        <button class="btn" onclick="showAddModal()">Add Skill</button>
+      </div>
+      <div class="tabs">
+        <button class="tab active" onclick="filterSkills('all')">All</button>
+        <button class="tab" onclick="filterSkills('OFFERED')">Offered</button>
+        <button class="tab" onclick="filterSkills('REQUESTED')">
+          Requested
+        </button>
+      </div>
+      <div class="skills-grid" id="skillsGrid"></div>
+    </div>
+    <div class="modal" id="addModal">
+      <div class="modal-content">
+        <h2>Add Skill</h2>
+        <form id="addSkillForm">
+          <div class="form-group">
+            <label>Skill Name</label>
+            <input type="text" id="skillName" required />
+          </div>
+          <div class="form-group">
+            <label>Description</label>
+            <textarea id="description" rows="3"></textarea>
+          </div>
+          <div class="form-group">
+            <label>Type</label>
+            <select id="type">
+              <option value="OFFERED">Offered</option>
+              <option value="REQUESTED">Requested</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Level</label>
+            <select id="level">
+              <option value="BEGINNER">Beginner</option>
+              <option value="INTERMEDIATE">Intermediate</option>
+              <option value="ADVANCED">Advanced</option>
+            </select>
+          </div>
+          <button type="submit" class="btn">Add Skill</button>
+          <button type="button" class="btn" onclick="closeModal()">
+            Cancel
+          </button>
+        </form>
+      </div>
+    </div>
+    <script>
+      let allSkills = [];
+      async function loadSkills() {
+        const response = await fetch("/api/users/me");
+        const user = await response.json();
+        const skillsResponse = await fetch(`/api/skills/user/${user.id}`);
+        allSkills = await skillsResponse.json();
+        displaySkills(allSkills);
+      }
+      function displaySkills(skills) {
+        const grid = document.getElementById("skillsGrid");
+        grid.innerHTML = skills
+          .map(
+            (skill) => `
+                <div class="skill-card">
+                    <div class="skill-header">
+                        <h3>${skill.skillName}</h3>
+                        <span class="skill-type ${skill.type.toLowerCase()}">${
+              skill.type
+            }</span>
+                    </div>
+                    <p>${skill.description || "No description"}</p>
+                    <p><strong>Level:</strong> ${skill.level}</p>
+                    <button class="btn" onclick="deleteSkill(${
+                      skill.id
+                    })">Delete</button>
+                </div>
+            `
+          )
+          .join("");
+      }
+      function filterSkills(type) {
+        document
+          .querySelectorAll(".tab")
+          .forEach((t) => t.classList.remove("active"));
+        event.target.classList.add("active");
+        const filtered =
+          type === "all" ? allSkills : allSkills.filter((s) => s.type === type);
+        displaySkills(filtered);
+      }
+      function showAddModal() {
+        document.getElementById("addModal").style.display = "flex";
+      }
+      function closeModal() {
+        document.getElementById("addModal").style.display = "none";
+      }
+      document
+        .getElementById("addSkillForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const skill = {
+            skillName: document.getElementById("skillName").value,
+            description: document.getElementById("description").value,
+            type: document.getElementById("type").value,
+            level: document.getElementById("level").value,
+          };
+          await fetch("/api/skills", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(skill),
+          });
+          closeModal();
+          loadSkills();
+        });
+      async function deleteSkill(id) {
+        if (confirm("Delete this skill?")) {
+          await fetch(`/api/skills/${id}`, { method: "DELETE" });
+          loadSkills();
+        }
+      }
+      async function logout() {
+        await fetch("/api/auth/logout", { method: "POST" });
+        window.location.href = "/";
+      }
+      loadSkills();
+    </script>
+  </body>
+</html>

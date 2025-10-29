@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Matches - Skill Swap</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; }
+        .navbar { background: #667eea; color: white; padding: 15px 30px; display: flex; justify-content: space-between; }
+        .nav-links a { color: white; text-decoration: none; margin-left: 20px; }
+        .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
+        .matches-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+        .match-card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .btn { padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer; margin-top: 10px; }
+        .btn:hover { background: #5568d3; }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h2>Skill Swap</h2>
+        <div class="nav-links">
+            <a href="/dashboard">Dashboard</a>
+            <a href="/skills">My Skills</a>
+            <a href="/matches">Matches</a>
+            <a href="/sessions">Sessions</a>
+            <a href="/profile">Profile</a>
+            <a href="#" onclick="logout()">Logout</a>
+        </div>
+    </div>
+    <div class="container">
+        <h1>Recommended Matches</h1>
+        <p>Students who can help you learn the skills you requested</p>
+        <div class="matches-grid" id="matchesGrid"></div>
+    </div>
+    <script>
+        async function loadMatches() {
+            const response = await fetch('/api/matching/matches');
+            const matches = await response.json();
+            const grid = document.getElementById('matchesGrid');
+            grid.innerHTML = matches.map(user => `
+                <div class="match-card">
+                    <h3>${user.firstName} ${user.lastName}</h3>
+                    <p><strong>University:</strong> ${user.university || 'N/A'}</p>
+                    <p><strong>Major:</strong> ${user.major || 'N/A'}</p>
+                    <p><strong>Rating:</strong> ${user.rating ? user.rating.toFixed(1) : 'No ratings yet'}</p>
+                    <p><strong>Completed Sessions:</strong> ${user.completedSessions}</p>
+                    <button class="btn" onclick="viewProfile(${user.id})">View Profile</button>
+                </div>
+            `).join('');
+        }
+        function viewProfile(userId) {
+            window.location.href = `/profile?userId=${userId}`;
+        }
+        async function logout() {
+            await fetch('/api/auth/logout', { method: 'POST' });
+            window.location.href = '/';
+        }
+        loadMatches();
+    </script>
+</body>
+</html>

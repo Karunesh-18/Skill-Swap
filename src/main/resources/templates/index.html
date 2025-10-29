@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skill Swap - Exchange Skills with Peers</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            text-align: center;
+        }
+        .hero {
+            background: white;
+            padding: 60px 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            font-size: 3rem;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+        p {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin: 40px 0;
+        }
+        .feature {
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        .feature h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 15px 40px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            margin: 10px;
+            transition: all 0.3s;
+        }
+        .btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        .btn-secondary {
+            background: #764ba2;
+        }
+        .btn-secondary:hover {
+            background: #653a8a;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="hero">
+            <h1>Skill Swap</h1>
+            <p>Exchange skills and knowledge with your peers. Learn together, grow together.</p>
+
+            <div class="features">
+                <div class="feature">
+                    <h3>📚 Share Skills</h3>
+                    <p>List what you can teach and what you want to learn</p>
+                </div>
+                <div class="feature">
+                    <h3>🤝 Find Matches</h3>
+                    <p>Connect with students who have complementary skills</p>
+                </div>
+                <div class="feature">
+                    <h3>📅 Schedule Sessions</h3>
+                    <p>Arrange skill exchange sessions at your convenience</p>
+                </div>
+                <div class="feature">
+                    <h3>⭐ Build Reputation</h3>
+                    <p>Rate and review to build a trusted community</p>
+                </div>
+            </div>
+
+            <div>
+                <a href="/login" class="btn">Login</a>
+                <a href="/register" class="btn btn-secondary">Register</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
