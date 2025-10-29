@@ -1,9 +1,15 @@
-package com.example.SkillSwap.repository;
+package com.example.demo.repository;
 
+import com.example.demo.model.Session;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-import com.example.SkillSwap.entity.Session;
+import java.util.List;
 
+@Repository
 public interface SessionRepository extends JpaRepository<Session, Long> {
-
+    List<Session> findByRequesterId(Long requesterId);
+    List<Session> findByProviderId(Long providerId);
+    List<Session> findByStatus(Session.SessionStatus status);
 }
+

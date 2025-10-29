@@ -1,9 +1,15 @@
-package com.example.SkillSwap.repository;
+package com.example.demo.repository;
 
+import com.example.demo.model.Skill;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-import com.example.SkillSwap.entity.Skill;
+import java.util.List;
 
+@Repository
 public interface SkillRepository extends JpaRepository<Skill, Long> {
-
+    List<Skill> findByUserId(Long userId);
+    List<Skill> findByType(Skill.SkillType type);
+    List<Skill> findBySkillNameContainingIgnoreCase(String skillName);
 }
+
