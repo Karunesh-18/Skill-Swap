@@ -113,12 +113,14 @@ If you see Access denied for user root@localhost, make sure:
 If port 8080 is already in use, change it in application.properties:
 server.port=8081
 
-## Notes for Beginners
+## Future Enhancements
 
-- This application uses simple session-based authentication
-- Passwords are stored in plain text (for learning only)
-- The code follows a simple layered architecture
-- No complex security features (JWT, encryption, etc.)
+- Implement OAuth2 for secure authentication
+- Add email verification
+- Integrate with calendar services for scheduling
+- Implement payment for premium features
+- Add more advanced matching algorithms
+- Improve UI/UX with modern design
 
 ## License
 
