@@ -1,14 +1,15 @@
-package com.example.SkillSwap.repository;
+package com.example.demo.repository;
 
+import com.example.demo.model.Review;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-import com.example.SkillSwap.entity.Review;
+import java.util.List;
 
+@Repository
 public interface ReviewRepository extends JpaRepository<Review, Long> {
-
+    List<Review> findByRevieweeId(Long revieweeId);
+    List<Review> findByReviewerId(Long reviewerId);
+    List<Review> findBySessionId(Long sessionId);
 }
 
-UserRepository extends JpaRepository<User, Long> {}
-public interface SkillRepository extends JpaRepository<Skill, Long> {}
-public interface SessionRepository extends JpaRepository<Session, Long> {}
-public interface ReviewRepository
