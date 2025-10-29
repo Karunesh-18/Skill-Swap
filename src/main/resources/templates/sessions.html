@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Sessions - Skill Swap</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: #f5f5f5;
+      }
+      .navbar {
+        background: #667eea;
+        color: white;
+        padding: 15px 30px;
+        display: flex;
+        justify-content: space-between;
+      }
+      .nav-links a {
+        color: white;
+        text-decoration: none;
+        margin-left: 20px;
+      }
+      .container {
+        max-width: 1200px;
+        margin: 30px auto;
+        padding: 0 20px;
+      }
+      .tabs {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+      }
+      .tab {
+        padding: 10px 20px;
+        background: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+      .tab.active {
+        background: #667eea;
+        color: white;
+      }
+      .sessions-grid {
+        display: grid;
+        gap: 20px;
+      }
+      .session-card {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+      .status {
+        padding: 5px 10px;
+        border-radius: 5px;
+        font-size: 0.9rem;
+        display: inline-block;
+      }
+      .pending {
+        background: #ff9800;
+        color: white;
+      }
+      .confirmed {
+        background: #2196f3;
+        color: white;
+      }
+      .completed {
+        background: #4caf50;
+        color: white;
+      }
+      .cancelled {
+        background: #f44336;
+        color: white;
+      }
+      .btn {
+        padding: 8px 15px;
+        background: #667eea;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-right: 10px;
+      }
+      .btn:hover {
+        background: #5568d3;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="navbar">
+      <h2>Skill Swap</h2>
+      <div class="nav-links">
+        <a href="/dashboard">Dashboard</a>
+        <a href="/skills">My Skills</a>
+        <a href="/matches">Matches</a>
+        <a href="/sessions">Sessions</a>
+        <a href="/profile">Profile</a>
+        <a href="#" onclick="logout()">Logout</a>
+      </div>
+    </div>
+    <div class="container">
+      <h1>My Sessions</h1>
+      <div class="tabs">
+        <button class="tab active" onclick="showRequested()">
+          Requested by Me
+        </button>
+        <button class="tab" onclick="showProvided()">Provided by Me</button>
+      </div>
+      <div class="sessions-grid" id="sessionsGrid"></div>
+    </div>
+    <script>
+      let requestedSessions = [];
+      let providedSessions = [];
+      async function loadSessions() {
+        const reqResponse = await fetch("/api/sessions/requested");
+        requestedSessions = await reqResponse.json();
+        const provResponse = await fetch("/api/sessions/provided");
+        providedSessions = await provResponse.json();
+        showRequested();
+      }
+      function showRequested() {
+        document
+          .querySelectorAll(".tab")
+          .forEach((t) => t.classList.remove("active"));
+        event.target.classList.add("active");
+        displaySessions(requestedSessions, "requested");
+      }
+      function showProvided() {
+        document
+          .querySelectorAll(".tab")
+          .forEach((t) => t.classList.remove("active"));
+        event.target.classList.add("active");
+        displaySessions(providedSessions, "provided");
+      }
+      function displaySessions(sessions, type) {
+        const grid = document.getElementById("sessionsGrid");
+        grid.innerHTML = sessions
+          .map(
+            (session) => `
+                <div class="session-card">
+                    <h3>${session.skillName}</h3>
+                    <p><strong>${
+                      type === "requested" ? "Provider" : "Requester"
+                    }:</strong> ${
+              type === "requested"
+                ? session.provider.firstName
+                : session.requester.firstName
+            } ${
+              type === "requested"
+                ? session.provider.lastName
+                : session.requester.lastName
+            }</p>
+                    <p><strong>Scheduled:</strong> ${new Date(
+                      session.scheduledTime
+                    ).toLocaleString()}</p>
+                    <p><strong>Duration:</strong> ${
+                      session.durationMinutes
+                    } minutes</p>
+                    <p><strong>Location:</strong> ${
+                      session.location || "Not specified"
+                    }</p>
+                    <p><strong>Status:</strong> <span class="status ${session.status.toLowerCase()}">${
+              session.status
+            }</span></p>
+                    <p>${session.description || ""}</p>
+                    <div>
+                        ${
+                          session.status === "PENDING" && type === "provided"
+                            ? `<button class="btn" onclick="confirmSession(${session.id})">Confirm</button>`
+                            : ""
+                        }
+                        ${
+                          session.status === "CONFIRMED"
+                            ? `<button class="btn" onclick="completeSession(${session.id})">Mark Complete</button>`
+                            : ""
+                        }
+                        ${
+                          session.status !== "COMPLETED" &&
+                          session.status !== "CANCELLED"
+                            ? `<button class="btn" onclick="cancelSession(${session.id})">Cancel</button>`
+                            : ""
+                        }
+                    </div>
+                </div>
+            `
+          )
+          .join("");
+      }
+      async function confirmSession(id) {
+        await fetch(`/api/sessions/${id}/confirm`, { method: "PUT" });
+        loadSessions();
+      }
+      async function completeSession(id) {
+        await fetch(`/api/sessions/${id}/complete`, { method: "PUT" });
+        loadSessions();
+      }
+      async function cancelSession(id) {
+        if (confirm("Cancel this session?")) {
+          await fetch(`/api/sessions/${id}/cancel`, { method: "PUT" });
+          loadSessions();
+        }
+      }
+      async function logout() {
+        await fetch("/api/auth/logout", { method: "POST" });
+        window.location.href = "/";
+      }
+      loadSessions();
+    </script>
+  </body>
+</html>
